@@ -78,8 +78,8 @@ void job(size_t thread_id, size_t scattering_num) {
 }
 
 int main() {
-    size_t n = 10;  // total scattering number
-    size_t job_num = 1;
+    size_t n = 100000;  // total scattering number
+    size_t job_num = 40;
 
     tf::Executor executor;
 

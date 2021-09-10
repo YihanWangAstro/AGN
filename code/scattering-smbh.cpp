@@ -18,7 +18,7 @@ void job(size_t thread_id, size_t scattering_num) {
     double v_inf = 10_kms;
     double r_start = 100_AU;
     double a_bh = 10_AU;
-    double a_smbh = 1000_AU;
+    double a_smbh = 1_PC;
 
     std::fstream post_flyby_file("phase-smbh-" + std::to_string(thread_id) + ".txt", std::ios::out);
 
