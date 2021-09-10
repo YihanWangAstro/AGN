@@ -72,16 +72,16 @@ void job(size_t thread_id, size_t scattering_num) {
 
             if (a > a_bh) {
                 fate = 0;
-            } else if (a < 0)
+            } else if (a < 0) {
                 fate = -1;
             } else {
-            fate = 2;
+                fate = 2;
             }
             print(post_flyby_file, b, ',', phi, ',', fate, '\n');
-    });
+        });
 
-    sim.run(args);
-}
+        sim.run(args);
+    }
 }
 
 int main() {
