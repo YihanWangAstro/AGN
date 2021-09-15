@@ -19,7 +19,7 @@ void job(size_t thread_id, size_t scattering_num, double a_bh, std::string fname
     double r_start = 10 * a_bh;
 
     std::fstream post_flyby_file(
-        fname + std::string(a_smbh) + "-" + std::string(a_bh) + "-" + std::to_string(thread_id) + ".txt",
+        fname + std::string(a_smbh) + "-" + std::to_string(a_bh) + "-" + std::to_string(thread_id) + ".txt",
         std::ios::out);
 
     a_smbh *= PC;
