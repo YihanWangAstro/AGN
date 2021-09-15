@@ -14,12 +14,13 @@ double calc_max_impact_parameter(double Q_max, double v_inf, double M_tot) {
     return Q_max * sqrt(1 + 2 * M_tot / v_inf / v_inf / Q_max);
 }
 
-void job(size_t thread_id, size_t scattering_num) {
-    double v_inf = 10_kms;
-    double r_start = 100_AU;
-    double a_bh = 10_AU;
+void job(size_t thread_id, size_t scattering_num, double a_bh, std::string fname, bool retro) {
+    double v_inf = 50_kms;
+    double r_start = 10 * a_bh;
+    // double a_bh = 10_AU;
 
-    std::fstream post_flyby_file("phase-" + std::to_string(thread_id) + ".txt", std::ios::out);
+    std::fstream post_flyby_file(fname + std::to_string(a_bh) + "-" + std::to_string(thread_id) + ".txt",
+                                 std::ios::out);
 
     print(post_flyby_file, std::setprecision(16));
 
@@ -41,7 +42,8 @@ void job(size_t thread_id, size_t scattering_num) {
 
         auto b = random::Uniform(0, b_max);
 
-        auto incident_orb = Hyperbolic(BH1.mass + BH2.mass, BH3.mass, v_inf, b, 0, 0.0, 0.0, r_start, orbit::Hyper::in);
+        auto incident_orb = Hyperbolic(BH1.mass + BH2.mass, BH3.mass, v_inf, b, consts::pi * double(retro), 0.0, 0.0,
+                                       r_start, orbit::Hyper::in);
 
         move_particles(bh_orb, BH2);
 
@@ -78,14 +80,40 @@ void job(size_t thread_id, size_t scattering_num) {
 }
 
 int main() {
-    size_t n = 100000;  // total scattering number
+    size_t n = 1000000;  // total scattering number
     size_t job_num = 40;
 
     tf::Executor executor;
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num);
+        executor.silent_async(job, i, n / job_num, 10_AU, "pro", false);
     }
-    executor.wait_for_all();  // wait all jobs to be finished
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 10_AU, "retro", true);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 1_AU, "pro", false);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 1_AU, "retro", true);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 0.1_AU, "pro", false);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 0.1_AU, "retro", true);
+    }
+    executor.wait_for_all();
+
     return 0;
 }

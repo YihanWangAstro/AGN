@@ -14,13 +14,15 @@ double calc_max_impact_parameter(double Q_max, double v_inf, double M_tot) {
     return Q_max * sqrt(1 + 2 * M_tot / v_inf / v_inf / Q_max);
 }
 
-void job(size_t thread_id, size_t scattering_num) {
-    double v_inf = 10_kms;
-    double r_start = 100_AU;
-    double a_bh = 10_AU;
-    double a_smbh = 1_PC;
+void job(size_t thread_id, size_t scattering_num, double a_bh, std::string fname, bool retro, double a_smbh) {
+    double v_inf = 50_kms;
+    double r_start = 10 * a_bh;
 
-    std::fstream post_flyby_file("phase-smbh-" + std::to_string(thread_id) + ".txt", std::ios::out);
+    std::fstream post_flyby_file(
+        fname + std::string(a_smbh) + "-" + std::string(a_bh) + "-" + std::to_string(thread_id) + ".txt",
+        std::ios::out);
+
+    a_smbh *= PC;
 
     print(post_flyby_file, std::setprecision(16));
 
@@ -45,7 +47,8 @@ void job(size_t thread_id, size_t scattering_num) {
 
         auto b = random::Uniform(0, b_max);
 
-        auto incident_orb = Hyperbolic(BH1.mass + BH2.mass, BH3.mass, v_inf, b, 0, 0.0, 0.0, r_start, orbit::Hyper::in);
+        auto incident_orb = Hyperbolic(BH1.mass + BH2.mass, BH3.mass, v_inf, b, consts::pi * double(retro), 0.0, 0.0,
+                                       r_start, orbit::Hyper::in);
 
         move_particles(bh_orb, BH2);
 
@@ -91,8 +94,133 @@ int main() {
     tf::Executor executor;
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num);
+        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_pro", false, 0.1);
     }
-    executor.wait_for_all();  // wait all jobs to be finished
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_retro", true, 0.1);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_pro", false, 0.07);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_retro", true, 0.07);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_pro", false, 0.05);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_retro", true, 0.05);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_pro", false, 0.03);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_retro", true, 0.03);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_pro", false, 0.01);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_retro", true, 0.01);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_pro", false, 0.07);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_retro", true, 0.07);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_pro", false, 0.05);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_retro", true, 0.05);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_pro", false, 0.03);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_retro", true, 0.03);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_pro", false, 0.01);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_retro", true, 0.01);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_pro", false, 0.07);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_retro", true, 0.07);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_pro", false, 0.05);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_retro", true, 0.05);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_pro", false, 0.03);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_retro", true, 0.03);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_pro", false, 0.01);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_retro", true, 0.01);
+    }
+    executor.wait_for_all();
     return 0;
 }
