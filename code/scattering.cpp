@@ -57,8 +57,8 @@ void job(size_t thread_id, size_t scattering_num, double a_bh, std::string fname
 
         Solver::RunArgs args;
 
-        args.set_atol(1e-13);
-        
+        args.atol = 1e-13;
+
         args.add_stop_condition(scattering_t_end);
 
         args.add_stop_point_operation([&](auto& ptc, auto h) {
