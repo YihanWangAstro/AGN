@@ -95,17 +95,37 @@ int main() {
 
     tf::Executor executor;
 
+    /* for (size_t i = 0; i < job_num; ++i) {
+         executor.silent_async(job, i, n / job_num, 10_AU, "smbh_pro", false, 0.1);
+     }
+     executor.wait_for_all();
+
+     for (size_t i = 0; i < job_num; ++i) {
+         executor.silent_async(job, i, n / job_num, 10_AU, "smbh_retro", true, 0.1);
+     }
+     executor.wait_for_all();*/
+
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_pro", false, 0.1);
+        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_pro", false, 0.1);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_retro", true, 0.1);
+        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_retro", true, 0.1);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_pro", false, 0.1);
+    }
+    executor.wait_for_all();
+
+    for (size_t i = 0; i < job_num; ++i) {
+        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_retro", true, 0.1);
+    }
+    executor.wait_for_all();
+
+    /*for (size_t i = 0; i < job_num; ++i) {
         executor.silent_async(job, i, n / job_num, 10_AU, "smbh_pro", false, 0.07);
     }
     executor.wait_for_all();
@@ -223,6 +243,6 @@ int main() {
     for (size_t i = 0; i < job_num; ++i) {
         executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_retro", true, 0.01);
     }
-    executor.wait_for_all();
+    executor.wait_for_all();*/
     return 0;
 }
