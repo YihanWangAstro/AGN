@@ -14,15 +14,15 @@ double calc_max_impact_parameter(double Q_max, double v_inf, double M_tot) {
     return Q_max * sqrt(1 + 2 * M_tot / v_inf / v_inf / Q_max);
 }
 
-void job(size_t thread_id, size_t scattering_num, double a_bh, std::string fname, bool retro, double a_smbh) {
+void job(size_t thread_id, size_t scattering_num, double a_bh, std::string fname, bool retro, double a_smbh_r) {
     double v_inf = 50_kms;
     double r_start = 10 * a_bh;
 
     std::fstream post_flyby_file(
-        fname + std::to_string(a_smbh) + "-" + std::to_string(a_bh) + "-" + std::to_string(thread_id) + ".txt",
+        fname + std::to_string(a_smbh_r) + "-" + std::to_string(a_bh) + "-" + std::to_string(thread_id) + ".txt",
         std::ios::out);
 
-    a_smbh *= PC;
+    double a_smbh = a_smbh_r * pow(1e8 / 60.0, 1.0 / 3) * a_bh;
 
     print(post_flyby_file, std::setprecision(16));
 
@@ -90,159 +90,130 @@ void job(size_t thread_id, size_t scattering_num, double a_bh, std::string fname
 }
 
 int main() {
-    size_t n = 1000000;  // total scattering number
+    size_t n = 1000000;
     size_t job_num = 40;
 
     tf::Executor executor;
 
-    /* for (size_t i = 0; i < job_num; ++i) {
-         executor.silent_async(job, i, n / job_num, 10_AU, "smbh_pro", false, 0.1);
-     }
-     executor.wait_for_all();
-
-     for (size_t i = 0; i < job_num; ++i) {
-         executor.silent_async(job, i, n / job_num, 10_AU, "smbh_retro", true, 0.1);
-     }
-     executor.wait_for_all();*/
-
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_pro", false, 0.1);
+        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_pro", false, 16);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_retro", true, 0.1);
+        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_retro", true, 16);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_pro", false, 0.1);
+        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_pro", false, 8);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_retro", true, 0.1);
-    }
-    executor.wait_for_all();
-
-    /*for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_pro", false, 0.07);
+        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_retro", true, 8);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_retro", true, 0.07);
+        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_pro", false, 4);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_pro", false, 0.05);
+        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_retro", true, 4);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_retro", true, 0.05);
+        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_pro", false, 2);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_pro", false, 0.03);
+        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_retro", true, 2);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_retro", true, 0.03);
+        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_pro", false, 16);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_pro", false, 0.01);
+        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_retro", true, 16);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 10_AU, "smbh_retro", true, 0.01);
+        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_pro", false, 8);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_pro", false, 0.07);
+        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_retro", true, 8);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_retro", true, 0.07);
+        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_pro", false, 4);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_pro", false, 0.05);
+        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_retro", true, 4);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_retro", true, 0.05);
+        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_pro", false, 2);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_pro", false, 0.03);
+        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_retro", true, 2);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_retro", true, 0.03);
+        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_pro", false, 16);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_pro", false, 0.01);
+        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_retro", true, 16);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 1_AU, "smbh_retro", true, 0.01);
+        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_pro", false, 8);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_pro", false, 0.07);
+        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_retro", true, 8);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_retro", true, 0.07);
+        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_pro", false, 4);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_pro", false, 0.05);
+        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_retro", true, 4);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_retro", true, 0.05);
+        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_pro", false, 2);
     }
     executor.wait_for_all();
 
     for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_pro", false, 0.03);
+        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_retro", true, 2);
     }
     executor.wait_for_all();
 
-    for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_retro", true, 0.03);
-    }
-    executor.wait_for_all();
-
-    for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_pro", false, 0.01);
-    }
-    executor.wait_for_all();
-
-    for (size_t i = 0; i < job_num; ++i) {
-        executor.silent_async(job, i, n / job_num, 0.1_AU, "smbh_retro", true, 0.01);
-    }
-    executor.wait_for_all();*/
     return 0;
 }
