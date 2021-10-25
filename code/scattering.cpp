@@ -19,7 +19,7 @@ void job(size_t thread_id, size_t scattering_num, double a_bh, std::string fname
     double r_start = 10 * a_bh;
     // double a_bh = 10_AU;
 
-    std::fstream post_flyby_file(fname + std::to_string(a_bh) + "-" + std::to_string(thread_id) + ".txt",
+    std::fstream post_flyby_file("ae_60_" + fname + std::to_string(a_bh) + "-" + std::to_string(thread_id) + ".txt",
                                  std::ios::out);
 
     print(post_flyby_file, std::setprecision(16));
@@ -31,19 +31,16 @@ void job(size_t thread_id, size_t scattering_num, double a_bh, std::string fname
         Particle BH2{30_Ms};
         Particle BH3{30_Ms};
 
-        // create planetary system with two giant planets
-        double inc = 0;
-
         auto phi = random::Uniform(0, 2 * consts::pi);
 
-        auto bh_orb = Elliptic(BH1.mass, BH2.mass, a_bh, 0.0, inc, 0.0, 0.0, phi);
+        auto bh_orb = Elliptic(BH1.mass, BH2.mass, a_bh, 0.0, consts::pi * double(retro), 0.0, 0.0, phi);
 
         double b_max = calc_max_impact_parameter(a_bh * 4, v_inf, M_tot(BH1, BH2, BH3));
 
-        auto b = random::Uniform(0, b_max);
+        auto b = random::Uniform(-b_max, b_max);
 
-        auto incident_orb = Hyperbolic(BH1.mass + BH2.mass, BH3.mass, v_inf, b, consts::pi * double(retro), 0.0, 0.0,
-                                       r_start, orbit::Hyper::in);
+        auto incident_orb = Hyperbolic(BH1.mass + BH2.mass, BH3.mass, v_inf, fabs(b), consts::pi * double(b < 0), 0.0,
+                                       0.0, r_start, orbit::Hyper::in);
 
         move_particles(bh_orb, BH2);
 
@@ -64,17 +61,7 @@ void job(size_t thread_id, size_t scattering_num, double a_bh, std::string fname
         args.add_stop_point_operation([&](auto& ptc, auto h) {
             auto [a, e] = calc_a_e(ptc.mass(0) + ptc.mass(1), ptc.pos(0) - ptc.pos(1), ptc.vel(0) - ptc.vel(1));
 
-            int fate = 0;
-
-            if (a > a_bh) {
-                fate = 0;
-            } else if (a < 0) {
-                fate = -1;
-            } else {
-                fate = 2;
-            }
-
-            print(post_flyby_file, b, ',', phi, ',', fate, '\n');
+            print(post_flyby_file, b, ',', phi, ',', a / a_bh, ',', e, '\n');
         });
 
         sim.run(args);
