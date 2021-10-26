@@ -9,6 +9,7 @@ using f = Interactions<NewtonianGrav>;
 using Solver = methods::DefaultMethod<f>;
 using Particle = Solver::Particle;
 
+double MBH3 = 30;
 // Q_max: max closest approach
 double calc_max_impact_parameter(double Q_max, double v_inf, double M_tot) {
     return Q_max * sqrt(1 + 2 * M_tot / v_inf / v_inf / Q_max);
@@ -16,10 +17,11 @@ double calc_max_impact_parameter(double Q_max, double v_inf, double M_tot) {
 
 void job(size_t thread_id, size_t scattering_num, double a_bh, std::string fname, bool retro) {
     double v_inf = 50_kms;
-    double r_start = 10 * a_bh;
+    double r_start = 20 * a_bh;
     // double a_bh = 10_AU;
 
-    std::fstream post_flyby_file("ae_60_" + fname + std::to_string(a_bh) + "-" + std::to_string(thread_id) + ".txt",
+    std::fstream post_flyby_file("ae-" + std::to_string(int(MBH3)) + "-" + fname + std::to_string(a_bh) + "-" +
+                                     std::to_string(thread_id) + ".txt",
                                  std::ios::out);
 
     print(post_flyby_file, std::setprecision(16));
@@ -29,7 +31,7 @@ void job(size_t thread_id, size_t scattering_num, double a_bh, std::string fname
     for (size_t i = 0; i < scattering_num; ++i) {
         Particle BH1{30_Ms};
         Particle BH2{30_Ms};
-        Particle BH3{30_Ms};
+        Particle BH3{MBH3};
 
         auto phi = random::Uniform(0, 2 * consts::pi);
 
@@ -48,7 +50,7 @@ void job(size_t thread_id, size_t scattering_num, double a_bh, std::string fname
 
         move_particles(incident_orb, BH3);
 
-        double scattering_t_end = 4 * time_to_periapsis(group(BH1, BH2), BH3);
+        double scattering_t_end = 4 * time_to_periapsis(incident_orb);
 
         Solver sim{0, BH1, BH2, BH3};
 
@@ -68,9 +70,11 @@ void job(size_t thread_id, size_t scattering_num, double a_bh, std::string fname
     }
 }
 
-int main() {
+int main(int argc, char** argv) {
     size_t n = 1000000;  // total scattering number
     size_t job_num = 40;
+
+    MBH3 = std::stod(argv[1]);
 
     tf::Executor executor;
 
