@@ -45,8 +45,10 @@ void job(size_t thread_id, size_t scattering_num, double a_bh, std::string fname
 
         auto b = random::Uniform(-b_max, b_max);
 
-        auto incident_orb = Hyperbolic(BH1.mass + BH2.mass, BH3.mass, v_inf, fabs(b), consts::pi * double(b < 0), 0.0,
-                                       0.0, r_start, orbit::Hyper::in);
+        double eps = 1e-6;
+
+        auto incident_orb = Hyperbolic(BH1.mass + BH2.mass, BH3.mass, v_inf, fabs(b) + eps, consts::pi * double(b < 0),
+                                       0.0, 0.0, r_start, orbit::Hyper::in);
 
         move_particles(bh_orb, BH2);
 
