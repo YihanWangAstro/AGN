@@ -17,7 +17,7 @@ double calc_max_impact_parameter(double Q_max, double v_inf, double M_tot) {
 
 void job(size_t thread_id, size_t scattering_num, double a_bh, std::string fname, bool retro) {
     double v_inf = 50_kms;
-    double r_start = 20 * a_bh;
+    double r_start = 10 * a_bh;
     // double a_bh = 10_AU;
 
     std::fstream post_flyby_file("ae-" + std::to_string(int(MBH3)) + "-" + fname + std::to_string(a_bh) + "-" +
