@@ -38,7 +38,7 @@ void job(size_t thread_id, size_t scattering_num, std::string fname, bool retro,
 
         auto smbh_orb = Elliptic(SMBH.mass, M_tot(BH1, BH3), a_smbh, 0.0, 0.0, 0.0, 0.0, -consts::pi * 0.5);
 
-        double b_max = calc_max_impact_parameter(a_bh * 4, v_inf, M_tot(BH1, BH2, BH3));
+        double b_max = calc_max_impact_parameter(5_AU, v_inf, M_tot(BH1, BH3));
 
         double eps = 1e-6;
 
