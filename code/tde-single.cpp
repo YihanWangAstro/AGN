@@ -24,7 +24,7 @@ void job(size_t thread_id, size_t scattering_num, std::string fname, bool retro,
                                      std::to_string(thread_id) + ".txt",
                                  std::ios::out);
 
-    double a_smbh = a_smbh_r * pow(1e8 / 60.0, 1.0 / 3) * a_bh;
+    double a_smbh = a_smbh_r * pow(1e8 / 60.0, 1.0 / 3) * 1_AU;
 
     print(post_flyby_file, std::setprecision(16));
 
