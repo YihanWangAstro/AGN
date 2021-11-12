@@ -18,7 +18,7 @@ double calc_max_impact_parameter(double Q_max, double v_inf, double M_tot) {
 
 void job(size_t thread_id, size_t scattering_num, std::string fname, bool retro, double a_smbh_r) {
     double v_inf = 50_kms;
-    double r_start = 10 * a_bh;
+    double r_start = 10_AU;
 
     std::fstream post_flyby_file("single-" + std::to_string(int(MBH3)) + "-" + fname + std::to_string(a_smbh_r) + "-" +
                                      std::to_string(thread_id) + ".txt",
@@ -36,7 +36,7 @@ void job(size_t thread_id, size_t scattering_num, std::string fname, bool retro,
 
         Particle BH3{MBH3};
 
-        auto smbh_orb = Elliptic(SMBH.mass, M_tot(BH1, BH2, BH3), a_smbh, 0.0, 0.0, 0.0, 0.0, -consts::pi * 0.5);
+        auto smbh_orb = Elliptic(SMBH.mass, M_tot(BH1, BH3), a_smbh, 0.0, 0.0, 0.0, 0.0, -consts::pi * 0.5);
 
         double b_max = calc_max_impact_parameter(a_bh * 4, v_inf, M_tot(BH1, BH2, BH3));
 
