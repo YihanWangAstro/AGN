@@ -8,6 +8,7 @@ using namespace orbit;
 using f = Interactions<NewtonianGrav>;
 using Solver = methods::DefaultMethod<f>;
 using Particle = Solver::Particle;
+using Vector = Particle::Vector;
 
 double MBH3 = 30;
 // Q_max: max closest approach
@@ -43,12 +44,12 @@ void job(size_t thread_id, size_t scattering_num, double a_bh, std::string fname
 
         double b_max = calc_max_impact_parameter(a_bh * 4, v_inf, M_tot(BH1, BH2, BH3));
 
-        auto b = random::Uniform(-b_max, b_max);
-
         double eps = 1e-6;
 
-        auto incident_orb = Hyperbolic(BH1.mass + BH2.mass, BH3.mass, v_inf, fabs(b) + eps, consts::pi * double(b < 0),
-                                       0.0, 0.0, r_start, orbit::Hyper::in);
+        auto b = random::Uniform(eps, b_max);
+
+        auto incident_orb = Hyperbolic(BH1.mass + BH2.mass, BH3.mass, v_inf, b, consts::pi * double(b < 0), 0.0, 0.0,
+                                       r_start, orbit::Hyper::in);
 
         move_particles(bh_orb, BH2);
 
@@ -60,9 +61,11 @@ void job(size_t thread_id, size_t scattering_num, double a_bh, std::string fname
 
         move_to_COM_frame(SMBH, BH1, BH2, BH3);
 
-        double scattering_t_end = 4 * time_to_periapsis(incident_orb);
+        double scattering_t_end = 2 * time_to_periapsis(incident_orb);
 
         Solver sim{0, SMBH, BH1, BH2, BH3};
+
+        Vector v0 = BH3.vel - SMBH.vel;
 
         Solver::RunArgs args;
 
@@ -73,7 +76,15 @@ void job(size_t thread_id, size_t scattering_num, double a_bh, std::string fname
         args.add_stop_point_operation([&](auto& ptc, auto h) {
             auto [a, e] = calc_a_e(ptc.mass(1) + ptc.mass(2), ptc.pos(1) - ptc.pos(2), ptc.vel(1) - ptc.vel(2));
 
-            print(post_flyby_file, b, ',', phi, ',', a / a_bh, ',', e, '\n');
+            auto dr = ptc.pos(3) - ptc.pos(0);
+
+            auto dv = ptc.vel(3) - ptc.vel(0);
+
+            double cos1 = dot(dr, dv) / (norm(dr) * norm(dv));
+
+            double cos2 = dot(v0, dv) / (norm(v0) * norm(dv));
+
+            print(post_flyby_file, b, ',', phi, ',', a / a_bh, ',', e, ',', cos1, ',', cos2, ',', dr, ',', dv, '\n');
         });
 
         // args.add_start_point_operation([&](auto& ptc, auto h) { print(std::cout, b, ',', retro, ',', ptc, '\n'); });
