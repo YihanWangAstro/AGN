@@ -22,7 +22,7 @@ void job(size_t scattering_num, double a_bh, std::string fname, bool retro, doub
     double r_start = 10 * a_bh;
 
     std::fstream post_flyby_file("ae-" + std::to_string(int(MBH3)) + "-" + fname + std::to_string(a_smbh_r) + "-" +
-                                     std::to_string(a_bh) + ".txt",
+                                     std::to_string(a_bh) + "-" + std::to_string(v_inf / 1_kms) + ".txt",
                                  std::ios::out);
 
     double a_smbh = a_smbh_r * pow(1e8 / 60.0, 1.0 / 3) * a_bh;
